@@ -1,0 +1,887 @@
+/* DrosoLab — Main Stylesheet */
+
+:root {
+    --bg-primary: #0a0a0f;
+    --bg-secondary: #12121a;
+    --bg-tertiary: #1a1a25;
+    --bg-elevated: #252532;
+    
+    --accent-primary: #00d4aa;
+    --accent-secondary: #ff6b6b;
+    --accent-tertiary: #4ecdc4;
+    --accent-quaternary: #ffe66d;
+    
+    --text-primary: #f0f0f5;
+    --text-secondary: #a0a0b0;
+    --text-muted: #606070;
+    
+    --border-subtle: #2a2a35;
+    --border-prominent: #3a3a50;
+    
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+    --shadow-glow: 0 0 30px rgba(0, 212, 170, 0.15);
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --font-sans: 'Inter', -apple-system, system-ui, sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-sans);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    background-image: 
+        radial-gradient(ellipse at 20% 20%, rgba(0, 212, 170, 0.03) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(255, 107, 107, 0.03) 0%, transparent 50%);
+}
+
+/* Typography */
+h1, h2, h3, h4 {
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+code {
+    font-family: var(--font-mono);
+    background: var(--bg-tertiary);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+/* Layout */
+.app-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.main-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+}
+
+.logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.logo-icon {
+    font-size: 2.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.logo h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+}
+
+.logo .accent {
+    color: var(--accent-primary);
+}
+
+.tagline {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.info-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.info-btn:hover {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
+/* Parents Panel */
+.parents-panel {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 2rem;
+    align-items: start;
+    margin-bottom: 3rem;
+}
+
+/* Parent Cards */
+.parent-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.parent-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-primary), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.parent-card:hover::before {
+    opacity: 1;
+}
+
+.parent-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.parent-card.male::before {
+    background: linear-gradient(90deg, var(--accent-primary), transparent);
+}
+
+.parent-card.female::before {
+    background: linear-gradient(90deg, var(--accent-secondary), transparent);
+}
+
+.parent-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.sex-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    background: var(--bg-tertiary);
+}
+
+.male .sex-icon {
+    color: var(--accent-primary);
+    background: rgba(0, 212, 170, 0.1);
+}
+
+.female .sex-icon {
+    color: var(--accent-secondary);
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.parent-header h2 {
+    flex: 1;
+    font-size: 1.25rem;
+}
+
+.chromosomes {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+}
+
+/* Trait Selectors */
+.trait-selector {
+    margin-bottom: 1.25rem;
+}
+
+.trait-selector label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.gene-tag {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    padding: 0.2em 0.5em;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    color: var(--accent-primary);
+}
+
+.gene-tag.sex-linked {
+    color: var(--accent-secondary);
+}
+
+select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23606070' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+}
+
+select:hover, select:focus {
+    border-color: var(--accent-primary);
+    outline: none;
+}
+
+/* Genotype Summary */
+.genotype-summary {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 1rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.genotype-summary::before {
+    content: 'GENOTYPE';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    padding: 0 0.5rem;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.genotype-summary code {
+    font-size: 1.1rem;
+    color: var(--accent-primary);
+    background: transparent;
+}
+
+/* Phenotype Preview */
+.phenotype-preview {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+}
+
+.fly-avatar {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.fly-body {
+    width: 100%;
+    height: 100%;
+    border-radius: 50% 50% 45% 45%;
+    position: relative;
+    transition: all 0.3s;
+}
+
+/* Body colors */
+.fly-avatar[data-body="gray"] .fly-body {
+    background: linear-gradient(135deg, #8B4513 0%, #D2691E 50%, #8B4513 100%);
+    box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3);
+}
+
+.fly-avatar[data-body="ebony"] .fly-body {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
+    box-shadow: inset -5px -5px 10px rgba(0,0,0,0.5);
+}
+
+/* Eyes */
+.fly-eyes {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    height: 20%;
+    display: flex;
+    gap: 10%;
+    justify-content: center;
+}
+
+.fly-eyes::before,
+.fly-eyes::after {
+    content: '';
+    width: 40%;
+    height: 100%;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.fly-avatar[data-eye="red"] .fly-eyes::before,
+.fly-avatar[data-eye="red"] .fly-eyes::after {
+    background: radial-gradient(circle at 30% 30%, #ff6b6b, #cc0000);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.3);
+}
+
+.fly-avatar[data-eye="white"] .fly-eyes::before,
+.fly-avatar[data-eye="white"] .fly-eyes::after {
+    background: radial-gradient(circle at 30% 30%, #ffffff, #e0e0e0);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Wings */
+.fly-wings {
+    position: absolute;
+    top: 30%;
+    left: -20%;
+    width: 140%;
+    height: 60%;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+.fly-wings::before,
+.fly-wings::after {
+    content: '';
+    width: 45%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 0 100% 0 100%;
+    transform-origin: bottom center;
+    transition: all 0.3s;
+}
+
+.fly-wings::after {
+    transform: scaleX(-1);
+}
+
+.fly-wings.vestigial::before,
+.fly-wings.vestigial::after {
+    height: 30%;
+    border-radius: 0 50% 0 50%;
+    border-color: var(--accent-secondary);
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.phenotype-info {
+    flex: 1;
+}
+
+.phenotype-info strong {
+    display: block;
+    color: var(--accent-primary);
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.phenotype-info span {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* Cross Controls */
+.cross-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.cross-btn {
+    background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-tertiary) 100%);
+    color: var(--bg-primary);
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.cross-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 212, 170, 0.4);
+}
+
+.cross-btn:active {
+    transform: translateY(0);
+}
+
+.btn-icon {
+    font-size: 1.25rem;
+}
+
+.random-btn {
+    background: transparent;
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.random-btn:hover {
+    border-color: var(--accent-quaternary);
+    color: var(--accent-quaternary);
+}
+
+/* Results Panel */
+.results-panel {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.tabs {
+    display: flex;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.tab {
+    flex: 1;
+    padding: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.tab:hover {
+    color: var(--text-primary);
+    background: var(--bg-elevated);
+}
+
+.tab.active {
+    color: var(--accent-primary);
+    background: var(--bg-secondary);
+}
+
+.tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent-primary);
+}
+
+.tab-content {
+    display: none;
+    padding: 2rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Cross Summary */
+.cross-summary {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.cross-summary h3 {
+    color: var(--accent-primary);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+.parents-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.parent-box {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    min-width: 150px;
+}
+
+.parent-box .sex {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.parent-box .genotype {
+    font-family: var(--font-mono);
+    color: var(--accent-primary);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.parent-box .phenotype {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.cross-symbol {
+    font-size: 2rem;
+    color: var(--accent-primary);
+}
+
+.cross-note {
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-top: 0.5rem;
+}
+
+/* Stats Grid */
+.outcome-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.stat-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-primary), var(--accent-tertiary));
+    transform: scaleX(0);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover::before {
+    transform: scaleX(1);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-prominent);
+}
+
+.stat-percentage {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--accent-primary);
+    font-family: var(--font-mono);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.stat-genotype {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    background: var(--bg-secondary);
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Ratio Display */
+.ratio-display {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    text-align: center;
+    margin: 2rem 0;
+}
+
+.ratio-title {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+}
+
+.ratio-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    font-family: var(--font-mono);
+}
+
+/* Trait Library */
+.trait-library {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.trait-card {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    transition: all 0.3s;
+}
+
+.trait-card:hover {
+    border-color: var(--accent-primary);
+    transform: translateX(5px);
+}
+
+.trait-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.trait-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.trait-type {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.trait-type.autosomal {
+    background: rgba(0, 212, 170, 0.1);
+    color: var(--accent-primary);
+}
+
+.trait-type.sex-linked {
+    background: rgba(255, 107, 107, 0.1);
+    color: var(--accent-secondary);
+}
+
+.trait-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.trait-alleles {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.allele {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.allele-symbol {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    background: var(--bg-secondary);
+}
+
+.allele-symbol.dominant {
+    color: var(--accent-primary);
+}
+
+.allele-symbol.recessive {
+    color: var(--text-secondary);
+}
+
+.chromosome-location {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--accent-tertiary);
+    background: var(--bg-secondary);
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+}
+
+/* Footer */
+.main-footer {
+    margin-top: auto;
+    padding-top: 3rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+.main-footer a {
+    color: var(--accent-primary);
+    text-decoration: none;
+    margin-left: 1rem;
+}
+
+.main-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 2rem;
+}
+
+.close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+}
+
+/* Utility */
+.hidden {
+    display: none !important;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
