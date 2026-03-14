@@ -1,307 +1,370 @@
 /**
- * DrosoLab — Main Application
- * Entry point and event handlers
+ * Kidd Lab NeuroCross — Main Application
+ * Drosophila neurogenetics cross simulator
  */
 
-// Initialize components
-const f1Grid = new PunnettGrid('f1PunnettGrid');
-const f2Grid = new PunnettGrid('f2PunnettGrid');
-const f1Stats = new StatsPanel('f1Stats');
-const f2Stats = new StatsPanel('f2Stats');
-
-// Current cross data
-let currentCross = null;
-let currentF1 = null;
-
-// Initialize on load
+// Initialize components when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    initializeEventListeners();
-    renderTraitLibrary();
-    updateParentDisplay('male');
-    updateParentDisplay('female');
+    initializeApp();
+    renderStockList();
+    setupEventListeners();
 });
 
-function initializeEventListeners() {
+function initializeApp() {
+    // Set default parents
+    updateParentDisplay('male');
+    updateParentDisplay('female');
+    
+    // Initialize tool tabs
+    document.querySelectorAll('.tool-tab').forEach(tab => {
+        tab.addEventListener('click', () => switchToolTab(tab));
+    });
+}
+
+function setupEventListeners() {
     // Parent selectors
     ['male', 'female'].forEach(sex => {
-        ['Body', 'Eye', 'Wing'].forEach(trait => {
-            const el = document.getElementById(`${sex}${trait}`);
-            if (el) {
-                el.addEventListener('change', () => updateParentDisplay(sex));
-            }
+        document.querySelectorAll(`#${sex}Card select`).forEach(select => {
+            select.addEventListener('change', () => updateParentDisplay(sex));
+        });
+        
+        // Balancer checkboxes
+        ['CyO', 'TM3', 'TM6B'].forEach(bal => {
+            const cb = document.getElementById(`${sex}${bal}`);
+            if (cb) cb.addEventListener('change', () => updateParentDisplay(sex));
         });
     });
     
-    // Tabs
+    // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
         tab.addEventListener('click', () => switchTab(tab.dataset.tab));
     });
 }
 
 function updateParentDisplay(sex) {
-    const body = document.getElementById(`${sex}Body`).value;
-    const eye = document.getElementById(`${sex}Eye`).value;
-    const wing = document.getElementById(`${sex}Wing`).value;
+    const data = collectGenotypeData(sex);
+    const genotypeString = buildGenotypeString(data);
+    const phenotype = determinePhenotype(data);
     
-    // Update genotype display
-    const genotypeEl = document.getElementById(`${sex}Genotype`);
-    genotypeEl.innerHTML = formatGenotype(body, eye, wing);
+    // Update displays
+    document.getElementById(`${sex}Genotype`).textContent = genotypeString;
+    document.getElementById(`${sex}Markers`).innerHTML = `<strong>Visible Markers:</strong> ${phenotype.markers.join(', ') || 'None'}`;
     
-    // Update visual
-    const visual = document.querySelector(`#${sex}Phenotype .fly-avatar`);
+    // Update fly visual
+    updateFlyVisual(sex, data, phenotype);
+    
+    // Check viability
+    checkViability(sex, data);
+}
+
+function collectGenotypeData(sex) {
+    const data = {
+        sex,
+        X: {
+            eye: document.getElementById(`${sex}Eye`).value,
+            fra: document.getElementById(`${sex}Fra`)?.value || 'fra+',
+            comm: document.getElementById(`${sex}Comm`)?.value || 'comm+'
+        },
+        chrom2: {
+            robo1: document.getElementById(`${sex}Robo1`).value,
+            robo2: document.getElementById(`${sex}Robo2`).value,
+            slit: document.getElementById(`${sex}Slit`).value,
+            netA: document.getElementById(`${sex}NetA`).value,
+            cyo: document.getElementById(`${sex}CyO`)?.checked || false
+        },
+        chrom3: {
+            robo3: document.getElementById(`${sex}Robo3`).value,
+            drl: document.getElementById(`${sex}Drl`).value,
+            wnt5: document.getElementById(`${sex}Wnt5`).value,
+            gal4: document.getElementById(`${sex}GAL4`).value,
+            uas: document.getElementById(`${sex}UAS`).value,
+            tm3: document.getElementById(`${sex}TM3`)?.checked || false,
+            tm6b: document.getElementById(`${sex}TM6B`)?.checked || false
+        }
+    };
+    
+    return data;
+}
+
+function buildGenotypeString(data) {
+    const parts = [];
+    
+    // X chromosome
+    let xPart = '';
+    if (data.sex === 'male') {
+        xPart = data.X.eye; // Already includes Y
+    } else {
+        // Parse female X
+        const eye = data.X.eye.replace(/X/g, '');
+        xPart = eye;
+    }
+    parts.push(xPart);
+    
+    // Add fra and comm if not wild-type
+    if (data.X.fra !== 'fra+') parts[0] += ` ${data.X.fra}`;
+    if (data.X.comm !== 'comm+') parts[0] += ` ${data.X.comm}`;
+    
+    // Chromosome 2
+    const chrom2Parts = [];
+    if (data.chrom2.robo1 !== 'robo+') chrom2Parts.push(data.chrom2.robo1);
+    if (data.chrom2.robo2 !== 'robo2+') chrom2Parts.push(data.chrom2.robo2);
+    if (data.chrom2.slit !== 'sli+') chrom2Parts.push(data.chrom2.slit);
+    if (data.chrom2.netA !== 'NetA+') chrom2Parts.push(data.chrom2.netA);
+    
+    if (data.chrom2.cyo) {
+        parts.push(chrom2Parts.length > 0 ? `CyO/${chrom2Parts.join(' ')}` : 'CyO/+');
+    } else if (chrom2Parts.length > 0) {
+        parts.push(chrom2Parts.join(' '));
+    }
+    
+    // Chromosome 3
+    const chrom3Parts = [];
+    if (data.chrom3.robo3 !== 'robo3+') chrom3Parts.push(data.chrom3.robo3);
+    if (data.chrom3.drl !== 'drl+') chrom3Parts.push(data.chrom3.drl);
+    if (data.chrom3.wnt5 !== 'Wnt5+') chrom3Parts.push(data.chrom3.wnt5);
+    if (data.chrom3.gal4 !== 'noGAL4') chrom3Parts.push(data.chrom3.gal4);
+    if (data.chrom3.uas !== 'noUAS') chrom3Parts.push(data.chrom3.uas);
+    
+    let chrom3Str = '';
+    if (data.chrom3.tm3) chrom3Str = 'TM3';
+    else if (data.chrom3.tm6b) chrom3Str = 'TM6B';
+    
+    if (chrom3Parts.length > 0) {
+        chrom3Str += chrom3Str ? `/${chrom3Parts.join(' ')}` : chrom3Parts.join(' ');
+    } else if (chrom3Str) {
+        chrom3Str += '/+';
+    }
+    
+    if (chrom3Str) parts.push(chrom3Str);
+    
+    return parts.join('; ') || 'w[1118]';
+}
+
+function determinePhenotype(data) {
+    const markers = [];
+    const genes = [];
+    
+    // Eye color
+    if (data.X.eye.includes('w+') || data.X.eye.includes('w[+]')) {
+        markers.push('Red eyes');
+    } else {
+        markers.push('White eyes');
+    }
+    
+    // Balancer markers
+    if (data.chrom2.cyo) markers.push('Curly wings');
+    if (data.chrom3.tm3) markers.push('Stubble bristles');
+    if (data.chrom3.tm6b) markers.push('Tubby body');
+    
+    // Gene mutations
+    if (data.X.fra !== 'fra+') genes.push('Frazzled mutant');
+    if (data.X.comm !== 'comm+') genes.push('Comm mutant');
+    if (data.chrom2.robo1 !== 'robo+') genes.push('Robo1 mutant');
+    if (data.chrom2.slit !== 'sli+') genes.push('Slit mutant');
+    
+    return { markers, genes };
+}
+
+function updateFlyVisual(sex, data, phenotype) {
+    const visual = document.getElementById(`${sex}FlyVisual`);
     const info = document.querySelector(`#${sex}Phenotype .phenotype-info`);
     
-    // Set data attributes for CSS styling
-    visual.setAttribute('data-body', body.includes('E') ? 'gray' : 'ebony');
-    visual.setAttribute('data-eye', eye.includes('R') ? 'red' : 'white');
-    visual.setAttribute('data-wing', wing.includes('V') ? 'long' : 'vestigial');
+    // Update classes based on genotype
+    visual.className = 'fly-avatar';
+    visual.classList.add(data.X.eye.includes('w+') ? 'red-eyes' : 'white-eyes');
+    if (data.chrom2.cyo) visual.classList.add('curly');
     
-    // Update wing class
-    const wings = visual.querySelector('.fly-wings');
-    wings.classList.toggle('vestigial', wing === 'vv');
+    // Update info
+    const name = phenotype.genes.length > 0 ? phenotype.genes.join(', ') : 'Wild-type';
+    info.querySelector('strong').textContent = name;
+    info.querySelector('span').textContent = phenotype.markers.join(', ') || 'Standard morphology';
     
-    // Update text
-    const pheno = calculatePhenotype(body, eye, wing);
-    info.querySelector('strong').textContent = pheno.name;
-    info.querySelector('span').textContent = pheno.description;
+    // Add genotype tags
+    const tagsContainer = document.getElementById(`${sex}Tags`);
+    tagsContainer.innerHTML = phenotype.genes.map(g => 
+        `<span class="genotype-tag">${g.replace(' mutant', '')}</span>`
+    ).join('');
 }
 
-function formatGenotype(body, eye, wing) {
-    // Format with superscripts for sex chromosomes
-    let eyeFormatted = eye;
-    if (eye.includes('X')) {
-        eyeFormatted = eye.replace(/X([Rr])/g, 'X<sup>$1</sup>');
-        if (eye.includes('Y')) eyeFormatted += 'Y';
-    }
-    return `${body} ${eyeFormatted} ${wing}`;
-}
-
-function calculatePhenotype(body, eye, wing) {
-    const parts = [];
-    let mutantCount = 0;
+function checkViability(sex, data) {
+    const alert = document.getElementById(`${sex}Viability`);
+    let lethal = false;
+    let reason = '';
     
-    if (body === 'ee') {
-        parts.push('Ebony body');
-        mutantCount++;
+    // Check lethal combinations
+    if (data.X.comm === 'commΔN' && sex === 'female') {
+        // commΔN/commΔN is lethal
+        const commSelect = document.getElementById(`${sex}Comm`);
+        if (commSelect.value === 'commΔNcommΔN') {
+            lethal = true;
+            reason = 'commΔN/commΔN is lethal';
+        }
+    }
+    
+    if (data.chrom2.slit === 'sli2sli2') {
+        lethal = true;
+        reason = 'Slit null homozygotes die';
+    }
+    
+    if (lethal) {
+        alert.classList.remove('hidden');
+        alert.querySelector('.alert-text').textContent = reason;
     } else {
-        parts.push('Gray body');
+        alert.classList.add('hidden');
     }
-    
-    if ((eye === 'XrY' || eye === 'XrXr') && !eye.includes('R')) {
-        parts.push('White eyes');
-        mutantCount++;
-    } else {
-        parts.push('Red eyes');
-    }
-    
-    if (wing === 'vv') {
-        parts.push('Vestigial wings');
-        mutantCount++;
-    } else {
-        parts.push('Long wings');
-    }
-    
-    let name = 'Wild Type';
-    if (mutantCount === 3) name = 'Triple Mutant';
-    else if (mutantCount === 2) name = 'Double Mutant';
-    else if (mutantCount === 1) name = 'Single Mutant';
-    
-    return {
-        name,
-        description: parts.join(', ')
-    };
 }
 
 function performCross() {
-    // Get genotypes
-    const maleBody = document.getElementById('maleBody').value;
-    const maleEye = document.getElementById('maleEye').value;
-    const maleWing = document.getElementById('maleWing').value;
+    const maleData = collectGenotypeData('male');
+    const femaleData = collectGenotypeData('female');
     
-    const femaleBody = document.getElementById('femaleBody').value;
-    const femaleEye = document.getElementById('femaleEye').value;
-    const femaleWing = document.getElementById('femaleWing').value;
+    const maleGeno = buildGenotypeString(maleData);
+    const femaleGeno = buildGenotypeString(femaleData);
     
-    const maleGeno = `${maleBody} ${maleEye} ${maleWing}`;
-    const femaleGeno = `${femaleBody} ${femaleEye} ${femaleWing}`;
-    
-    // Perform F1 cross
-    currentCross = Calc.cross(maleGeno, femaleGeno);
-    currentF1 = Object.keys(currentCross.offspring)[0]; // Store for F2
+    // Perform calculation
+    const result = Calc.cross(maleGeno, femaleGeno);
     
     // Display results
-    displayResults(maleGeno, femaleGeno);
+    displayResults(result, maleGeno, femaleGeno);
     
     // Show panel
-    document.getElementById('resultsPanel').style.display = 'block';
-    document.getElementById('resultsPanel').scrollIntoView({ behavior: 'smooth' });
+    const panel = document.getElementById('resultsPanel');
+    panel.style.display = 'block';
+    panel.classList.add('active');
+    panel.scrollIntoView({ behavior: 'smooth' });
 }
 
-function displayResults(maleGeno, femaleGeno) {
-    // Parent summary
+function displayResults(result, maleGeno, femaleGeno) {
+    // Parent display
     const parentsDisplay = document.getElementById('parentsDisplay');
-    const mPheno = calculatePhenotype(
-        document.getElementById('maleBody').value,
-        document.getElementById('maleEye').value,
-        document.getElementById('maleWing').value
-    );
-    const fPheno = calculatePhenotype(
-        document.getElementById('femaleBody').value,
-        document.getElementById('femaleEye').value,
-        document.getElementById('femaleWing').value
-    );
-    
     parentsDisplay.innerHTML = `
         <div class="parent-box">
             <div class="sex">♂</div>
-            <div class="genotype">${formatGenotypeForDisplay(maleGeno)}</div>
-            <div class="phenotype">${mPheno.name}</div>
+            <div class="genotype">${maleGeno}</div>
+            <div class="phenotype">${determinePhenotype(collectGenotypeData('male')).markers.join(', ')}</div>
         </div>
         <div class="cross-symbol">×</div>
         <div class="parent-box">
             <div class="sex">♀</div>
-            <div class="genotype">${formatGenotypeForDisplay(femaleGeno)}</div>
-            <div class="phenotype">${fPheno.name}</div>
+            <div class="genotype">${femaleGeno}</div>
+            <div class="phenotype">${determinePhenotype(collectGenotypeData('female')).markers.join(', ')}</div>
         </div>
     `;
     
-    // F1 Generation
-    f1Grid.render(currentCross, { showProbabilities: true });
-    f1Stats.render(currentCross);
+    // F1 Table
+    const tbody = document.getElementById('f1TableBody');
+    tbody.innerHTML = '';
     
-    // F2 Generation (F1 self-cross)
-    const f2Cross = Calc.calculateF2(currentF1);
-    f2Grid.render(f2Cross, { showProbabilities: true, size: 'large' });
-    f2Stats.render(f2Cross);
+    Object.entries(result.offspring).forEach(([geno, data]) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="genotype-cell">${geno}</td>
+            <td class="phenotype-cell">${data.phenotype.description}</td>
+            <td>${Object.entries(data.sexes).map(([s, c]) => `${c} ${s}`).join(', ')}</td>
+            <td class="ratio-cell">${data.count}/${result.total}</td>
+            <td class="percent-cell">${data.percentage}%</td>
+            <td class="${data.viability.viable ? 'viability-viable' : 'viability-lethal'}">
+                ${data.viability.viable ? '✓ Viable' : `✗ ${data.viability.reason}`}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
     
-    // Calculate and display ratio
-    displayRatio(f2Cross);
+    // Calculate F2
+    calculateF2(result);
 }
 
-function formatGenotypeForDisplay(geno) {
-    return geno.replace(/X([Rr])/g, 'X<sup>$1</sup>');
-}
-
-function displayRatio(f2Cross) {
-    const groups = {};
-    for (const key in f2Cross.offspring) {
-        const cat = f2Cross.offspring[key].phenotype.category;
-        groups[cat] = (groups[cat] || 0) + f2Cross.offspring[key].count;
-    }
+function calculateF2(f1Result) {
+    const f2Type = document.getElementById('f2CrossType').value;
+    const f2Result = Calc.calculateF2(f1Result, f2Type);
     
-    const sorted = Object.entries(groups).sort((a, b) => b[1] - a[1]);
-    const ratio = sorted.map(([_, count]) => count).join(':');
+    if (!f2Result) return;
     
-    const ratioDisplay = document.getElementById('f2Ratio');
-    const ratioNames = {
-        '9:3:3:1': '9:3:3:1 (Classic Dihybrid)',
-        '3:1': '3:1 (Monohybrid)',
-        '1:1': '1:1 (Test Cross)',
-        '1:0': '1:0 (Uniform)'
-    };
+    // F2 Table
+    const tbody = document.getElementById('f2TableBody');
+    tbody.innerHTML = '';
     
-    ratioDisplay.textContent = ratioNames[ratio] || ratio;
+    Object.entries(f2Result.offspring).forEach(([geno, data]) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="genotype-cell">${geno}</td>
+            <td class="phenotype-cell">${data.phenotype.category}</td>
+            <td>${data.phenotype.markers}</td>
+            <td class="ratio-cell">${data.count}/${f2Result.total}</td>
+            <td class="percent-cell">${data.percentage}%</td>
+            <td>${data.viability.viable ? 'Keep' : 'Discard'}</td>
+        `;
+        tbody.appendChild(row);
+    });
 }
 
 function switchTab(tabName) {
-    // Update buttons
-    document.querySelectorAll('.tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.tab === tabName);
-    });
-    
-    // Update content
-    document.querySelectorAll('.tab-content').forEach(c => {
-        c.classList.toggle('active', c.id === `${tabName}Content`);
-    });
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tabName));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `${tabName}Content`));
 }
 
-function renderTraitLibrary() {
-    const container = document.getElementById('traitLibrary');
+function switchToolTab(tab) {
+    document.querySelectorAll('.tool-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+}
+
+function renderStockList() {
+    const container = document.getElementById('stockList');
+    if (!container) return;
     
-    const traits = [
-        {
-            name: 'Body Color',
-            gene: 'E/e',
-            type: 'autosomal',
-            chrom: '3',
-            dom: 'Gray (E)',
-            rec: 'Ebony (e)',
-            desc: 'Body pigmentation. Gray is wild-type, ebony is a dark recessive mutation.'
-        },
-        {
-            name: 'Eye Color',
-            gene: 'R/r',
-            type: 'sex-linked',
-            chrom: 'X',
-            dom: 'Red (X^R)',
-            rec: 'White (X^r)',
-            desc: 'X-linked inheritance. White eyes discovered by Morgan (1910). Males are hemizygous.'
-        },
-        {
-            name: 'Wing Type',
-            gene: 'V/v',
-            type: 'autosomal',
-            chrom: '2',
-            dom: 'Long (V)',
-            rec: 'Vestigial (v)',
-            desc: 'Wing development. Vestigial wings are shortened and cannot support flight.'
-        }
-    ];
-    
-    container.innerHTML = traits.map(t => `
-        <div class="trait-card">
-            <div class="trait-header">
-                <span class="trait-name">${t.name}</span>
-                <span class="trait-type ${t.type}">${t.type}</span>
+    container.innerHTML = LAB_STOCKS.map(stock => `
+        <div class="stock-item" onclick="loadStockData('${stock.id}')">
+            <div class="stock-number">${stock.id}</div>
+            <div class="stock-genotype">${stock.genotype}</div>
+            <div class="stock-description">${stock.description}</div>
+            <div class="stock-tags">
+                <span class="stock-tag">${stock.type}</span>
+                ${stock.chromosome ? `<span class="stock-tag">Chr ${stock.chromosome}</span>` : ''}
+                ${stock.source ? `<span class="stock-tag">${stock.source}</span>` : ''}
             </div>
-            <div class="trait-description">${t.desc}</div>
-            <div class="trait-alleles">
-                <div class="allele">
-                    <span class="allele-symbol dominant">${t.dom}</span>
-                    <span>Dominant</span>
-                </div>
-                <div class="allele">
-                    <span class="allele-symbol recessive">${t.rec}</span>
-                    <span>Recessive</span>
-                </div>
-            </div>
-            <span class="chromosome-location">Chromosome ${t.chrom}</span>
         </div>
     `).join('');
 }
 
 function randomizeParents() {
-    const randomGeno = () => {
-        const options = ['EE', 'Ee', 'ee'];
-        return options[Math.floor(Math.random() * options.length)];
-    };
-    
-    const randomEye = (sex) => {
-        if (sex === 'male') {
-            return Math.random() > 0.5 ? 'XRY' : 'XrY';
-        } else {
-            const r = Math.random();
-            if (r > 0.66) return 'XRXR';
-            if (r > 0.33) return 'XRXr';
-            return 'XrXr';
-        }
-    };
-    
-    const randomWing = () => {
-        const options = ['VV', 'Vv', 'vv'];
-        return options[Math.floor(Math.random() * options.length)];
-    };
-    
-    document.getElementById('maleBody').value = randomGeno();
-    document.getElementById('maleEye').value = randomEye('male');
-    document.getElementById('maleWing').value = randomWing();
-    
-    document.getElementById('femaleBody').value = randomGeno();
-    document.getElementById('femaleEye').value = randomEye('female');
-    document.getElementById('femaleWing').value = randomWing();
+    // Randomize all selectors
+    ['male', 'female'].forEach(sex => {
+        document.querySelectorAll(`#${sex}Card select`).forEach(select => {
+            const options = select.querySelectorAll('option');
+            select.selectedIndex = Math.floor(Math.random() * options.length);
+        });
+    });
     
     updateParentDisplay('male');
     updateParentDisplay('female');
+}
+
+function clearParents() {
+    // Reset to w[1118]
+    document.getElementById('maleEye').value = 'XwY';
+    document.getElementById('femaleEye').value = 'XwXw';
+    
+    ['male', 'female'].forEach(sex => {
+        ['Robo1', 'Robo2', 'Slit', 'NetA', 'Robo3', 'Drl', 'Wnt5'].forEach(gene => {
+            const el = document.getElementById(`${sex}${gene}`);
+            if (el) el.selectedIndex = 0;
+        });
+        
+        ['CyO', 'TM3', 'TM6B'].forEach(bal => {
+            const el = document.getElementById(`${sex}${bal}`);
+            if (el) el.checked = false;
+        });
+    });
+    
+    updateParentDisplay('male');
+    updateParentDisplay('female');
+}
+
+function copyGenotype(sex) {
+    const geno = document.getElementById(`${sex}Genotype`).textContent;
+    navigator.clipboard.writeText(geno).then(() => {
+        alert('Genotype copied to clipboard');
+    });
 }
 
 function showModal(type) {
@@ -310,22 +373,29 @@ function showModal(type) {
     
     if (type === 'about') {
         body.innerHTML = `
-            <h2>About DrosoLab</h2>
-            <p>DrosoLab is an interactive genetic cross simulator for <em>Drosophila melanogaster</em> 
-            (fruit flies), the model organism that revolutionized genetics research.</p>
-            
-            <h3>Features</h3>
+            <h2>About Kidd Lab NeuroCross</h2>
+            <p>Advanced Drosophila genetics simulator designed for the Kidd Laboratory at the University of Nevada, Reno.</p>
+            <h3>Research Focus</h3>
             <ul>
-                <li>Autosomal and sex-linked inheritance</li>
-                <li>Real-time Punnett square generation</li>
-                <li>F1 and F2 generation analysis</li>
-                <li>Phenotypic ratio calculations</li>
+                <li>Axon guidance mechanisms</li>
+                <li>Netrin-Frazzled signaling</li>
+                <li>Slit-Robo repulsion</li>
+                <li>Commissure formation</li>
+                <li>Neural circuit assembly</li>
             </ul>
-            
-            <h3>History</h3>
-            <p>Thomas Hunt Morgan's work with fruit flies at Columbia University (1908-1928) 
-            established the chromosome theory of inheritance. The white-eye mutation, discovered 
-            in 1910, was the first sex-linked trait identified.</p>
+        `;
+    } else if (type === 'balancers') {
+        body.innerHTML = `
+            <h2>Balancer Chromosome Guide</h2>
+            <p>Balancers are multiply inverted chromosomes that suppress recombination and carry dominant markers.</p>
+            <h3>Common Balancers</h3>
+            <ul>
+                <li><strong>CyO</strong> - Chromosome 2, Curly wings</li>
+                <li><strong>TM3, Sb</strong> - Chromosome 3, Stubble bristles</li>
+                <li><strong>TM6B, Tb</strong> - Chromosome 3, Tubby body</li>
+                <li><strong>FM7</strong> - X chromosome, Bar eyes</li>
+            </ul>
+            <p><strong>Rule:</strong> Never allow balancer homozygotes - they are lethal or sterile.</p>
         `;
     }
     
@@ -336,7 +406,12 @@ function closeModal() {
     document.getElementById('modal').classList.remove('active');
 }
 
-// Close modal on outside click
-document.getElementById('modal').addEventListener('click', (e) => {
-    if (e.target.id === 'modal') closeModal();
-});
+function exportNotes() {
+    const notes = document.getElementById('expNotes').value;
+    const blob = new Blob([notes], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `droso-cross-notes-${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+}
