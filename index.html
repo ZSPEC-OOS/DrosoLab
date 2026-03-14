@@ -3,147 +3,530 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Interactive Drosophila melanogaster genetic cross simulator for Mendelian genetics education">
+    <meta name="description" content="Drosophila neurogenetics cross simulator for axon guidance and neural development research - Kidd Lab">
     <meta name="theme-color" content="#00d4aa">
-    <title>DrosoLab | Drosophila Genetics Simulator</title>
+    <meta name="author" content="Kidd Lab, University of Nevada, Reno">
+    <title>Kidd Lab Cross | Drosophila Neurogenetics Simulator</title>
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/svg+xml" href="assets/images/fly-icon.svg">
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/punnett.css">
     <link rel="stylesheet" href="assets/css/responsive.css">
+    <link rel="stylesheet" href="assets/css/neuro.css">
 </head>
 <body>
     <div class="app-container">
         <header class="main-header">
-            <div class="logo">
-                <span class="logo-icon">🧬</span>
-                <h1>Droso<span class="accent">Lab</span></h1>
+            <div class="lab-banner">
+                <span class="lab-name">Kidd Lab</span>
+                <span class="lab-affiliation">University of Nevada, Reno • Department of Biology</span>
             </div>
-            <p class="tagline">Interactive Mendelian Genetics Laboratory</p>
-            <button class="info-btn" onclick="showModal('about')">ℹ️ About</button>
+            <div class="logo">
+                <span class="logo-icon">🧠</span>
+                <h1>Neuro<span class="accent">Cross</span></h1>
+            </div>
+            <p class="tagline">Drosophila Neurogenetics & Axon Guidance Cross Simulator</p>
+            <div class="header-actions">
+                <button class="header-btn" onclick="showModal('about')">About</button>
+                <button class="header-btn" onclick="showModal('lab-protocols')">Lab Protocols</button>
+                <button class="header-btn primary" onclick="showModal('balancers')">Balancer Guide</button>
+            </div>
         </header>
 
         <main class="cross-interface">
+            <!-- Research Tools Panel -->
+            <section class="tools-panel" id="toolsPanel">
+                <div class="tool-tabs">
+                    <button class="tool-tab active" data-tool="standard">Standard Cross</button>
+                    <button class="tool-tab" data-tool="balancer">Balancer Cross</button>
+                    <button class="tool-tab" data-tool="recombine">Recombination Mapping</button>
+                    <button class="tool-tab" data-tool="deficiency">Deficiency Mapping</button>
+                    <button class="tool-tab" data-tool="rnai">RNAi Cross</button>
+                </div>
+            </section>
+
             <!-- Parent Selection Panel -->
             <section class="parents-panel">
+                <!-- Male Parent -->
                 <div class="parent-card male" id="maleCard">
                     <div class="parent-header">
                         <span class="sex-icon">♂</span>
-                        <h2>Male Parent</h2>
-                        <span class="chromosomes">XY</span>
-                    </div>
-                    
-                    <div class="trait-selector">
-                        <label>Body Color <span class="gene-tag">E/e</span></label>
-                        <select id="maleBody" data-trait="body">
-                            <option value="EE">EE — Homozygous Dominant (Gray)</option>
-                            <option value="Ee">Ee — Heterozygous (Gray)</option>
-                            <option value="ee">ee — Homozygous Recessive (Ebony)</option>
-                        </select>
+                        <div class="parent-title">
+                            <h2>Male Parent</h2>
+                            <span class="chromosome-display">XY</span>
+                        </div>
+                        <div class="parent-actions">
+                            <button class="icon-btn" onclick="loadStock('male')" title="Load from Stock List">📋</button>
+                            <button class="icon-btn" onclick="saveStock('male')" title="Save to Stock">💾</button>
+                        </div>
                     </div>
 
-                    <div class="trait-selector">
-                        <label>Eye Color <span class="gene-tag sex-linked">X<sup>R</sup>/X<sup>r</sup></span></label>
-                        <select id="maleEye" data-trait="eye" data-sex-linked="true">
-                            <option value="XRY">X<sup>R</sup>Y — Red Eyes</option>
-                            <option value="XrY">X<sup>r</sup>Y — White Eyes</option>
-                        </select>
+                    <!-- Chromosome 1: X -->
+                    <div class="chromosome-section">
+                        <div class="chrom-header">
+                            <span class="chrom-label">X Chromosome</span>
+                            <span class="chrom-markers">1</span>
+                        </div>
+                        
+                        <div class="trait-selector">
+                            <label>Eye Color <span class="gene-tag">w<sup>+</sup>/w</span></label>
+                            <select id="maleEye" data-trait="eye" data-chrom="X" onchange="updateParentDisplay('male')">
+                                <option value="Xw+Y">X^w+ Y (Red eyes, wild-type)</option>
+                                <option value="XwY">X^w Y (White eyes)</option>
+                                <option value="XwY;w+">X^w Y; w+ (White eyes, w+ on autosome)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Frazzled (DCC) <span class="gene-tag">fra</span></label>
+                            <select id="maleFra" data-trait="fra" data-chrom="X" onchange="updateParentDisplay('male')">
+                                <option value="fra+">fra+ (Wild-type axon guidance)</option>
+                                <option value="fra3">fra3 (Loss of function)</option>
+                                <option value="fra4">fra4 (Strong loss of function)</option>
+                                <option value="fraGAL4">fra-GAL4 (Expression driver)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Commissureless <span class="gene-tag">comm</span></label>
+                            <select id="maleComm" data-trait="comm" data-chrom="X" onchange="updateParentDisplay('male')">
+                                <option value="comm+">comm+ (Normal commissure formation)</option>
+                                <option value="commΔN">commΔN (Truncated, dominant negative)</option>
+                                <option value="comm5">comm5 (Loss of function)</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="trait-selector">
-                        <label>Wing Type <span class="gene-tag">V/v</span></label>
-                        <select id="maleWing" data-trait="wing">
-                            <option value="VV">VV — Long Wings</option>
-                            <option value="Vv">Vv — Long Wings</option>
-                            <option value="vv">vv — Vestigial Wings</option>
-                        </select>
+                    <!-- Chromosome 2 -->
+                    <div class="chromosome-section">
+                        <div class="chrom-header">
+                            <span class="chrom-label">Chromosome 2</span>
+                            <span class="chrom-markers">2L | 2R</span>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Robo1 <span class="gene-tag">robo</span></label>
+                            <select id="maleRobo1" data-trait="robo1" data-chrom="2" onchange="updateParentDisplay('male')">
+                                <option value="robo+">robo+ (Wild-type midline repulsion)</option>
+                                <option value="robo1">robo1 (Loss of function)</option>
+                                <option value="robo2">robo2 (Transheterozygote viable)</option>
+                                <option value="roboGAL4">robo-GAL4</option>
+                                <option value="UAS-robo">UAS-robo (Overexpression)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Robo2 <span class="gene-tag">robo2</span></label>
+                            <select id="maleRobo2" data-trait="robo2" data-chrom="2" onchange="updateParentDisplay('male')">
+                                <option value="robo2+">robo2+ (Lateral positioning)</option>
+                                <option value="robo21">robo21 (Loss of function)</option>
+                                <option value="robo22">robo22 (Strong allele)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Slit <span class="gene-tag">sli</span></label>
+                            <select id="maleSlit" data-trait="slit" data-chrom="2" onchange="updateParentDisplay('male')">
+                                <option value="sli+">sli+ (Midline repellent)</option>
+                                <option value="sli2">sli2 (Loss of function)</option>
+                                <option value="sliUAS">UAS-sli (Ectopic expression)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Netrin-A <span class="gene-tag">NetA</span></label>
+                            <select id="maleNetA" data-trait="netA" data-chrom="2" onchange="updateParentDisplay('male')">
+                                <option value="NetA+">NetA+ (Attractive cue)</option>
+                                <option value="NetAΔ">NetAΔ (Deletion)</option>
+                                <option value="NetAe">NetAe (Ectopic)</option>
+                            </select>
+                        </div>
+
+                        <div class="balancer-toggle">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="maleCyO" onchange="updateParentDisplay('male')">
+                                <span class="checkmark"></span>
+                                CyO Balancer (Curly wings, 2nd chrom)
+                            </label>
+                        </div>
                     </div>
 
+                    <!-- Chromosome 3 -->
+                    <div class="chromosome-section">
+                        <div class="chrom-header">
+                            <span class="chrom-label">Chromosome 3</span>
+                            <span class="chrom-markers">3L | 3R</span>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Robo3 <span class="gene-tag">robo3</span></label>
+                            <select id="maleRobo3" data-trait="robo3" data-chrom="3" onchange="updateParentDisplay('male')">
+                                <option value="robo3+">robo3+ (Commissure exit)</option>
+                                <option value="robo31">robo31 (Loss of function)</option>
+                                <option value="robo3GAL4">robo3-GAL4</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Derailed <span class="gene-tag">drl</span></label>
+                            <select id="maleDrl" data-trait="drl" data-chrom="3" onchange="updateParentDisplay('male')">
+                                <option value="drl+">drl+ (Wnt5 receptor)</option>
+                                <option value="drl2">drl2 (Loss of function)</option>
+                                <option value="drlRed">drl-Red (Protein trap)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Wnt5 <span class="gene-tag">Wnt5</span></label>
+                            <select id="maleWnt5" data-trait="wnt5" data-chrom="3" onchange="updateParentDisplay('male')">
+                                <option value="Wnt5+">Wnt5+ (Repulsive cue)</option>
+                                <option value="Wnt5Δ">Wnt5Δ (Deletion)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>GAL4 Driver <span class="gene-tag">GAL4</span></label>
+                            <select id="maleGAL4" data-trait="gal4" data-chrom="3" onchange="updateParentDisplay('male')">
+                                <option value="noGAL4">No GAL4</option>
+                                <option value="elavGAL4">elav-GAL4 (All neurons)</option>
+                                <option value="repoGAL4">repo-GAL4 (Glia)</option>
+                                <option value="futschGAL4">futsch-GAL4 (Motor neurons)</option>
+                                <option value="GMR-GAL4">GMR-GAL4 (Eye/photoreceptors)</option>
+                                <option value="fraGAL4">fra-GAL4 (Frazzled pattern)</option>
+                                <option value="roboGAL4">robo-GAL4 (Robo pattern)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>UAS Effector <span class="gene-tag">UAS</span></label>
+                            <select id="maleUAS" data-trait="uas" data-chrom="3" onchange="updateParentDisplay('male')">
+                                <option value="noUAS">No UAS</option>
+                                <option value="UAS-mCD8GFP">UAS-mCD8::GFP (Membrane label)</option>
+                                <option value="UAS-tdTomato">UAS-tdTomato</option>
+                                <option value="UAS-RNAi">UAS-RNAi (RNA interference)</option>
+                                <option value="UAS-TrpA1">UAS-TrpA1 (Thermogenetic activation)</option>
+                                <option value="UAS-Shi[ts]">UAS-Shi[ts] (Temperature-sensitive shibire)</option>
+                            </select>
+                        </div>
+
+                        <div class="balancer-toggle">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="maleTM3" onchange="updateParentDisplay('male')">
+                                <span class="checkmark"></span>
+                                TM3, Sb (Stubble, 3rd chrom)
+                            </label>
+                        </div>
+
+                        <div class="balancer-toggle">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="maleTM6B" onchange="updateParentDisplay('male')">
+                                <span class="checkmark"></span>
+                                TM6B, Tb (Tubby, 3rd chrom)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Chromosome 4 -->
+                    <div class="chromosome-section collapsed">
+                        <div class="chrom-header" onclick="toggleChrom(this)">
+                            <span class="chrom-label">Chromosome 4 <span class="tiny">(click to expand)</span></span>
+                            <span class="chrom-markers">4</span>
+                        </div>
+                        
+                        <div class="chrom-content">
+                            <div class="trait-selector">
+                                <label>Ci <span class="gene-tag">ci</span></label>
+                                <select id="maleCi" data-trait="ci" data-chrom="4" onchange="updateParentDisplay('male')">
+                                    <option value="ci+">ci+ (Cubitus interruptus)</option>
+                                    <option value="ciD">ciD (Dominant)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Markers Summary -->
+                    <div class="markers-summary" id="maleMarkers">
+                        <strong>Visible Markers:</strong> None selected
+                    </div>
+
+                    <!-- Genotype Summary -->
                     <div class="genotype-summary">
-                        <code id="maleGenotype">EE X<sup>R</sup>Y VV</code>
+                        <code id="maleGenotype">w[1118]</code>
+                        <button class="copy-btn" onclick="copyGenotype('male')" title="Copy to clipboard">📋</button>
                     </div>
 
+                    <!-- Phenotype Preview -->
                     <div class="phenotype-preview" id="malePhenotype">
-                        <div class="fly-avatar wild-type" data-body="gray" data-eye="red" data-wing="long">
+                        <div class="fly-avatar" id="maleFlyVisual" data-sex="male">
                             <div class="fly-body"></div>
                             <div class="fly-eyes"></div>
                             <div class="fly-wings"></div>
+                            <div class="fly-markers"></div>
                         </div>
                         <div class="phenotype-info">
-                            <strong>Wild Type</strong>
-                            <span>Gray body, Red eyes, Long wings</span>
+                            <strong>Wild Type (w[1118])</strong>
+                            <span>White eyes (background), standard morphology</span>
+                            <div class="genotype-tags" id="maleTags"></div>
                         </div>
+                    </div>
+
+                    <!-- Viability Warning -->
+                    <div class="viability-alert hidden" id="maleViability">
+                        <span class="alert-icon">⚠️</span>
+                        <span class="alert-text">Expected lethal or phenotypic defects</span>
                     </div>
                 </div>
 
+                <!-- Cross Controls -->
                 <div class="cross-controls">
-                    <button class="cross-btn" onclick="performCross()">
+                    <div class="cross-type-selector">
+                        <label>Cross Type</label>
+                        <select id="crossType" onchange="updateCrossInfo()">
+                            <option value="standard">Standard Cross</option>
+                            <option value="test">Test Cross</option>
+                            <option value="intercross">F1 Intercross</option>
+                            <option value="backcross">Backcross to Parent</option>
+                            <option value="balancer">Balancer Maintenance</option>
+                        </select>
+                    </div>
+
+                    <button class="cross-btn primary" onclick="performCross()">
                         <span class="btn-icon">⚡</span>
                         <span class="btn-text">Perform Cross</span>
                     </button>
-                    <button class="random-btn" onclick="randomizeParents()">
-                        🎲 Random
+                    
+                    <button class="cross-btn secondary" onclick="randomizeParents()">
+                        <span class="btn-icon">🎲</span>
+                        <span class="btn-text">Random Stock</span>
                     </button>
+
+                    <button class="cross-btn secondary" onclick="clearParents()">
+                        <span class="btn-icon">🔄</span>
+                        <span class="btn-text">Reset to w[1118]</span>
+                    </button>
+
+                    <div class="cross-info" id="crossInfo">
+                        Standard Mendelian cross with expected 3:1 or 9:3:3:1 ratios
+                    </div>
                 </div>
 
+                <!-- Female Parent -->
                 <div class="parent-card female" id="femaleCard">
                     <div class="parent-header">
                         <span class="sex-icon">♀</span>
-                        <h2>Female Parent</h2>
-                        <span class="chromosomes">XX</span>
-                    </div>
-                    
-                    <div class="trait-selector">
-                        <label>Body Color <span class="gene-tag">E/e</span></label>
-                        <select id="femaleBody" data-trait="body">
-                            <option value="EE">EE — Homozygous Dominant (Gray)</option>
-                            <option value="Ee">Ee — Heterozygous (Gray)</option>
-                            <option value="ee" selected>ee — Homozygous Recessive (Ebony)</option>
-                        </select>
+                        <div class="parent-title">
+                            <h2>Female Parent</h2>
+                            <span class="chromosome-display">XX</span>
+                        </div>
+                        <div class="parent-actions">
+                            <button class="icon-btn" onclick="loadStock('female')" title="Load from Stock List">📋</button>
+                            <button class="icon-btn" onclick="saveStock('female')" title="Save to Stock">💾</button>
+                        </div>
                     </div>
 
-                    <div class="trait-selector">
-                        <label>Eye Color <span class="gene-tag sex-linked">X<sup>R</sup>/X<sup>r</sup></span></label>
-                        <select id="femaleEye" data-trait="eye" data-sex-linked="true">
-                            <option value="XRXR">X<sup>R</sup>X<sup>R</sup> — Red Eyes</option>
-                            <option value="XRXr">X<sup>R</sup>X<sup>r</sup> — Red Eyes</option>
-                            <option value="XrXr" selected>X<sup>r</sup>X<sup>r</sup> — White Eyes</option>
-                        </select>
+                    <!-- Chromosome 1: X -->
+                    <div class="chromosome-section">
+                        <div class="chrom-header">
+                            <span class="chrom-label">X Chromosome</span>
+                            <span class="chrom-markers">1</span>
+                        </div>
+                        
+                        <div class="trait-selector">
+                            <label>Eye Color <span class="gene-tag">w<sup>+</sup>/w</span></label>
+                            <select id="femaleEye" data-trait="eye" data-chrom="X" onchange="updateParentDisplay('female')">
+                                <option value="Xw+Xw+">X^w+ X^w+ (Red eyes, homozygous)</option>
+                                <option value="Xw+Xw">X^w+ X^w (Red eyes, carrier)</option>
+                                <option value="XwXw" selected>X^w X^w (White eyes)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Frazzled (DCC) <span class="gene-tag">fra</span></label>
+                            <select id="femaleFra" data-trait="fra" data-chrom="X" onchange="updateParentDisplay('female')">
+                                <option value="fra+fra+">fra+ fra+ (Wild-type)</option>
+                                <option value="fra+fra3">fra+ fra3 (Heterozygote)</option>
+                                <option value="fra3fra3">fra3 fra3 (Homozygous mutant)</option>
+                                <option value="fraGAL4fra+">fra-GAL4 fra+</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Commissureless <span class="gene-tag">comm</span></label>
+                            <select id="femaleComm" data-trait="comm" data-chrom="X" onchange="updateParentDisplay('female')">
+                                <option value="comm+comm+">comm+ comm+</option>
+                                <option value="comm+commΔN">comm+ commΔN</option>
+                                <option value="commΔNcommΔN">commΔN commΔN (Lethal)</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="trait-selector">
-                        <label>Wing Type <span class="gene-tag">V/v</span></label>
-                        <select id="femaleWing" data-trait="wing">
-                            <option value="VV">VV — Long Wings</option>
-                            <option value="Vv">Vv — Long Wings</option>
-                            <option value="vv" selected>vv — Vestigial Wings</option>
-                        </select>
+                    <!-- Chromosome 2 -->
+                    <div class="chromosome-section">
+                        <div class="chrom-header">
+                            <span class="chrom-label">Chromosome 2</span>
+                            <span class="chrom-markers">2L | 2R</span>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Robo1 <span class="gene-tag">robo</span></label>
+                            <select id="femaleRobo1" data-trait="robo1" data-chrom="2" onchange="updateParentDisplay('female')">
+                                <option value="robo+robo+">robo+ robo+</option>
+                                <option value="robo+robo1">robo+ robo1</option>
+                                <option value="robo1robo1">robo1 robo1</option>
+                                <option value="CyOrobo1">CyO/robo1 (Balancer)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Robo2 <span class="gene-tag">robo2</span></label>
+                            <select id="femaleRobo2" data-trait="robo2" data-chrom="2" onchange="updateParentDisplay('female')">
+                                <option value="robo2+robo2+">robo2+ robo2+</option>
+                                <option value="robo2+robo21">robo2+ robo21</option>
+                                <option value="robo21robo21">robo21 robo21</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Slit <span class="gene-tag">sli</span></label>
+                            <select id="femaleSlit" data-trait="slit" data-chrom="2" onchange="updateParentDisplay('female')">
+                                <option value="sli+sli+">sli+ sli+</option>
+                                <option value="sli+sli2">sli+ sli2</option>
+                                <option value="sli2sli2">sli2 sli2 (Lethal)</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Netrin-A <span class="gene-tag">NetA</span></label>
+                            <select id="femaleNetA" data-trait="netA" data-chrom="2" onchange="updateParentDisplay('female')">
+                                <option value="NetA+NetA+">NetA+ NetA+</option>
+                                <option value="NetA+NetAΔ">NetA+ NetAΔ</option>
+                                <option value="NetAΔNetAΔ">NetAΔ NetAΔ</option>
+                            </select>
+                        </div>
+
+                        <div class="balancer-toggle">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="femaleCyO" onchange="updateParentDisplay('female')">
+                                <span class="checkmark"></span>
+                                CyO / + (or CyO / mutant)
+                            </label>
+                        </div>
                     </div>
 
+                    <!-- Chromosome 3 -->
+                    <div class="chromosome-section">
+                        <div class="chrom-header">
+                            <span class="chrom-label">Chromosome 3</span>
+                            <span class="chrom-markers">3L | 3R</span>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Robo3 <span class="gene-tag">robo3</span></label>
+                            <select id="femaleRobo3" data-trait="robo3" data-chrom="3" onchange="updateParentDisplay('female')">
+                                <option value="robo3+robo3+">robo3+ robo3+</option>
+                                <option value="robo3+robo31">robo3+ robo31</option>
+                                <option value="robo31robo31">robo31 robo31</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Derailed <span class="gene-tag">drl</span></label>
+                            <select id="femaleDrl" data-trait="drl" data-chrom="3" onchange="updateParentDisplay('female')">
+                                <option value="drl+drl+">drl+ drl+</option>
+                                <option value="drl+drl2">drl+ drl2</option>
+                                <option value="drl2drl2">drl2 drl2</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>Wnt5 <span class="gene-tag">Wnt5</span></label>
+                            <select id="femaleWnt5" data-trait="wnt5" data-chrom="3" onchange="updateParentDisplay('female')">
+                                <option value="Wnt5+Wnt5+">Wnt5+ Wnt5+</option>
+                                <option value="Wnt5+Wnt5Δ">Wnt5+ Wnt5Δ</option>
+                                <option value="Wnt5ΔWnt5Δ">Wnt5Δ Wnt5Δ</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>GAL4 Driver <span class="gene-tag">GAL4</span></label>
+                            <select id="femaleGAL4" data-trait="gal4" data-chrom="3" onchange="updateParentDisplay('female')">
+                                <option value="noGAL4">No GAL4</option>
+                                <option value="elavGAL4elavGAL4">elav-GAL4 (homozygous)</option>
+                                <option value="elavGAL4+">elav-GAL4 / +</option>
+                                <option value="repoGAL4repoGAL4">repo-GAL4</option>
+                                <option value="GMR-GAL4GMR-GAL4">GMR-GAL4</option>
+                                <option value="fraGAL4fraGAL4">fra-GAL4</option>
+                            </select>
+                        </div>
+
+                        <div class="trait-selector">
+                            <label>UAS Effector <span class="gene-tag">UAS</span></label>
+                            <select id="femaleUAS" data-trait="uas" data-chrom="3" onchange="updateParentDisplay('female')">
+                                <option value="noUAS">No UAS</option>
+                                <option value="UAS-mCD8GFPUAS-mCD8GFP">UAS-mCD8::GFP (homozygous)</option>
+                                <option value="UAS-mCD8GFP+">UAS-mCD8::GFP / +</option>
+                                <option value="UAS-RNAiUAS-RNAi">UAS-RNAi</option>
+                            </select>
+                        </div>
+
+                        <div class="balancer-toggle">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="femaleTM3" onchange="updateParentDisplay('female')">
+                                <span class="checkmark"></span>
+                                TM3, Sb / + (or / mutant)
+                            </label>
+                        </div>
+
+                        <div class="balancer-toggle">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="femaleTM6B" onchange="updateParentDisplay('female')">
+                                <span class="checkmark"></span>
+                                TM6B, Tb / + (or / mutant)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Markers Summary -->
+                    <div class="markers-summary" id="femaleMarkers">
+                        <strong>Visible Markers:</strong> White eyes (w)
+                    </div>
+
+                    <!-- Genotype Summary -->
                     <div class="genotype-summary">
-                        <code id="femaleGenotype">ee X<sup>r</sup>X<sup>r</sup> vv</code>
+                        <code id="femaleGenotype">w[1118]</code>
+                        <button class="copy-btn" onclick="copyGenotype('female')" title="Copy to clipboard">📋</button>
                     </div>
 
+                    <!-- Phenotype Preview -->
                     <div class="phenotype-preview" id="femalePhenotype">
-                        <div class="fly-avatar triple-mutant" data-body="ebony" data-eye="white" data-wing="vestigial">
+                        <div class="fly-avatar" id="femaleFlyVisual" data-sex="female">
                             <div class="fly-body"></div>
                             <div class="fly-eyes"></div>
-                            <div class="fly-wings vestigial"></div>
+                            <div class="fly-wings"></div>
+                            <div class="fly-markers"></div>
                         </div>
                         <div class="phenotype-info">
-                            <strong>Triple Mutant</strong>
-                            <span>Ebony body, White eyes, Vestigial wings</span>
+                            <strong>Wild Type (w[1118])</strong>
+                            <span>White eyes (background), standard morphology</span>
+                            <div class="genotype-tags" id="femaleTags"></div>
                         </div>
+                    </div>
+
+                    <!-- Viability Warning -->
+                    <div class="viability-alert hidden" id="femaleViability">
+                        <span class="alert-icon">⚠️</span>
+                        <span class="alert-text">Expected lethal or phenotypic defects</span>
                     </div>
                 </div>
             </section>
 
-            <!-- Results Section -->
+            <!-- Results Panel -->
             <section class="results-panel" id="resultsPanel">
                 <div class="tabs">
-                    <button class="tab active" data-tab="f1">F1 Generation</button>
-                    <button class="tab" data-tab="f2">F2 Generation</button>
-                    <button class="tab" data-tab="library">Trait Library</button>
+                    <button class="tab active" data-tab="f1">F1 Progeny</button>
+                    <button class="tab" data-tab="f2">F2 / Analysis</button>
+                    <button class="tab" data-tab="stocks">Lab Stocks</button>
+                    <button class="tab" data-tab="tools">Research Tools</button>
                 </div>
 
                 <!-- F1 Content -->
@@ -151,10 +534,30 @@
                     <div class="cross-summary">
                         <h3>Parental Cross (P)</h3>
                         <div class="parents-display" id="parentsDisplay"></div>
+                        <div class="cross-details" id="crossDetails"></div>
+                    </div>
+
+                    <div class="progeny-section">
+                        <h4>Expected F1 Progeny</h4>
+                        <div class="progeny-table-container">
+                            <table class="progeny-table" id="f1Table">
+                                <thead>
+                                    <tr>
+                                        <th>Genotype</th>
+                                        <th>Phenotype</th>
+                                        <th>Sex</th>
+                                        <th>Ratio</th>
+                                        <th>Expected %</th>
+                                        <th>Viability</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="f1TableBody"></tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="punnett-container">
-                        <h4>Punnett Square — F1 Generation</h4>
+                        <h4>Punnett Square Visualization</h4>
                         <div id="f1PunnettGrid" class="punnett-grid"></div>
                     </div>
 
@@ -163,36 +566,114 @@
 
                 <!-- F2 Content -->
                 <div class="tab-content" id="f2Content">
-                    <div class="cross-summary">
-                        <h3>F1 Self-Cross (F1 × F1)</h3>
-                        <p class="cross-note">F1 generation intercrossed to reveal recessive traits</p>
+                    <div class="f2-controls">
+                        <label>F1 Cross Type:</label>
+                        <select id="f2CrossType" onchange="calculateF2()">
+                            <option value="intercross">F1 Intercross (♂ × ♀)</option>
+                            <option value="self">F1 Self-cross (if applicable)</option>
+                            <option value="testcross">Test Cross to w[1118]</option>
+                            <option value="balancer">Balancer Maintenance</option>
+                        </select>
                     </div>
 
-                    <div class="punnett-container">
-                        <h4>Punnett Square — F2 Generation</h4>
-                        <div id="f2PunnettGrid" class="punnett-grid large"></div>
+                    <div class="progeny-section">
+                        <h4>F2 Generation Analysis</h4>
+                        <div class="progeny-table-container">
+                            <table class="progeny-table" id="f2Table">
+                                <thead>
+                                    <tr>
+                                        <th>Genotype</th>
+                                        <th>Phenotype</th>
+                                        <th>Class</th>
+                                        <th>Ratio</th>
+                                        <th>Expected %</th>
+                                        <th>Selection</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="f2TableBody"></tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div class="ratio-display" id="f2Ratio"></div>
                     <div class="outcome-stats" id="f2Stats"></div>
+
+                    <div class="experimental-notes">
+                        <h4>Experimental Notes</h4>
+                        <textarea id="expNotes" placeholder="Enter experimental observations, stock numbers, or phenotype notes here..."></textarea>
+                        <button onclick="exportNotes()">Export Notes</button>
+                    </div>
                 </div>
 
-                <!-- Library Content -->
-                <div class="tab-content" id="libraryContent">
-                    <div class="trait-library" id="traitLibrary"></div>
+                <!-- Stocks Content -->
+                <div class="tab-content" id="stocksContent">
+                    <div class="stocks-header">
+                        <h3>Lab Stock Collection</h3>
+                        <button class="btn" onclick="addNewStock()">+ Add Stock</button>
+                        <button class="btn" onclick="exportStockList()">Export CSV</button>
+                    </div>
+                    
+                    <div class="stock-filters">
+                        <input type="text" id="stockSearch" placeholder="Search stocks..." onkeyup="filterStocks()">
+                        <select id="stockFilter" onchange="filterStocks()">
+                            <option value="all">All Stocks</option>
+                            <option value="balancer">Balancers</option>
+                            <option value="mutant">Mutants</option>
+                            <option value="driver">GAL4 Drivers</option>
+                            <option value="effector">UAS Effectors</option>
+                            <option value="deficiency">Deficiencies</option>
+                        </select>
+                    </div>
+
+                    <div class="stock-list" id="stockList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Tools Content -->
+                <div class="tab-content" id="toolsContent">
+                    <div class="tools-grid">
+                        <div class="tool-card" onclick="showTool('recombine')">
+                            <h4>Recombination Calculator</h4>
+                            <p>Calculate map distances from recombination frequencies</p>
+                        </div>
+                        <div class="tool-card" onclick="showTool('deficiency')">
+                            <h4>Deficiency Mapping</h4>
+                            <p>Map mutations using overlapping deficiencies</p>
+                        </div>
+                        <div class="tool-card" onclick="showTool('sequencing')">
+                            <h4>Genotype Predictor</h4>
+                            <p>Predict genotypes from phenotype data</p>
+                        </div>
+                        <div class="tool-card" onclick="showTool('pedigree')">
+                            <h4>Pedigree Builder</h4>
+                            <p>Visual stock lineage and cross history</p>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>
 
         <footer class="main-footer">
-            <p>DrosoLab — Open Source Genetics Education</p>
-            <a href="https://github.com/yourusername/droso-lab" target="_blank">GitHub</a>
+            <div class="footer-content">
+                <div class="lab-info">
+                    <strong>Kidd Laboratory</strong>
+                    <span>Department of Biology, UNR</span>
+                    <span>Axon Guidance & Neural Development</span>
+                </div>
+                <div class="footer-links">
+                    <a href="https://www.unr.edu/biology/research/labs/kidd" target="_blank">Lab Website</a>
+                    <a href="https://flybase.org" target="_blank">FlyBase</a>
+                    <a href="https://bdsc.indiana.edu" target="_blank">BDSC Stock Center</a>
+                </div>
+            </div>
+            <div class="version">v2.0.0 | Built for Drosophila neurogenetics research</div>
         </footer>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal System -->
     <div class="modal" id="modal">
-        <div class="modal-content">
+        <div class="modal-content large">
             <span class="close-btn" onclick="closeModal()">&times;</span>
             <div id="modalBody"></div>
         </div>
@@ -201,12 +682,13 @@
     <!-- Scripts -->
     <script src="assets/js/genetics/traits.js"></script>
     <script src="assets/js/genetics/calculator.js"></script>
-    <script src="assets/js/components/FlyVisual.js"></script>
+    <script src="assets/js/genetics/balancers.js"></script>
+    <script src="assets/js/genetics/stocks.js"></script>
     <script src="assets/js/components/PunnettGrid.js"></script>
     <script src="assets/js/components/StatsPanel.js"></script>
+    <script src="assets/js/components/StockManager.js"></script>
     <script src="assets/js/app.js"></script>
     
-    <!-- Service Worker -->
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('service-worker.js');
